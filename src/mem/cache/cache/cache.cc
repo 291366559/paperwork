@@ -65,7 +65,6 @@
 #include "sim/sim_exit.hh"
 
 //zlf
-#include "mem/cache/tags/base_set_assoc.hh"
 #define LISTSIZE 500
 //end
 
@@ -326,9 +325,9 @@ Cache::access(PacketPtr pkt, CacheBlk *&blk, Cycles &lat,
     //zlf
     if(name()=="system.cpu.dcache")
     {
-        unsigned int accaddress = blockAlign(pkt->getAddr());
+        unsigned int accaddress = pkt->getBlockAddr(blkSize);
         int setnum=tags->extractSet(pkt->getAddr());
-        std::list <unsigned int> >::iteraotr listpos;
+        std::list <unsigned int>::iterator listpos;
         if(l1map.find(setnum)!=l1map.end())
         {
             int stackdis=0;
@@ -362,13 +361,13 @@ Cache::access(PacketPtr pkt, CacheBlk *&blk, Cycles &lat,
        if(name()=="system.cpu.dcache")
        {
            if(l1map[tags->extractSet(pkt->getAddr())].size() >= LISTSIZE)
-               l1map[tags->extractSet(pkt->getAddr())].erase(l1map[extractSet(pkt->getAddr())].begin());
-           l1map(tags->extractSet(pkt->getAddr())).push_back(blockAglin(pkt->getAddr()));
-           coldmap.insert(blockAglin(pkt->getAddr()));
+               l1map[tags->extractSet(pkt->getAddr())].erase(l1map[tags->extractSet(pkt->getAddr())].begin());
+           l1map[tags->extractSet(pkt->getAddr())].push_back(pkt->getBlockAddr(blkSize));
+           coldmap.insert(pkt->getBlockAddr(blkSize));
        }
    }
    //end
-
+   //
     if (pkt->isEviction()) {
         // We check for presence of block in above caches before issuing
         // Writeback or CleanEvict to write buffer. Therefore the only
@@ -437,9 +436,9 @@ Cache::access(PacketPtr pkt, CacheBlk *&blk, Cycles &lat,
             if(name()=="system.cpu.dcache")
             {
                 if(l1map[tags->extractSet(pkt->getAddr())].size() >= LISTSIZE)
-                    l1map[tags->extractSet(pkt->getAddr())].erase(l1map[extractSet(pkt->getAddr())].begin());
-                l1map(tags->extractSet(pkt->getAddr())).push_back(blockAglin(pkt->getAddr()));
-                coldmap.insert(blockAglin(pkt->getAddr()));
+                    l1map[tags->extractSet(pkt->getAddr())].erase(l1map[tags->extractSet(pkt->getAddr())].begin());
+                l1map[tags->extractSet(pkt->getAddr())].push_back(pkt->getBlockAddr(blkSize));
+                coldmap.insert(pkt->getBlockAddr(blkSize));
             }
        //end
             blk->status = (BlkValid | BlkReadable);
@@ -1821,9 +1820,9 @@ Cache::handleFill(PacketPtr pkt, CacheBlk *blk, PacketList &writebacks,
             if(name()=="system.cpu.dcache")
             {
                 if(l1map[tags->extractSet(pkt->getAddr())].size() >= LISTSIZE)
-                    l1map[tags->extractSet(pkt->getAddr())].erase(l1map[extractSet(pkt->getAddr())].begin());
-                l1map(tags->extractSet(pkt->getAddr())).push_back(blockAglin(pkt->getAddr()));
-                coldmap.insert(blockAglin(pkt->getAddr()));
+                    l1map[tags->extractSet(pkt->getAddr())].erase(l1map[tags->extractSet(pkt->getAddr())].begin());
+                l1map[tags->extractSet(pkt->getAddr())].push_back(pkt->getBlockAddr(blkSize));
+                coldmap.insert(pkt->getBlockAddr(blkSize));
             }
             //end
         }
